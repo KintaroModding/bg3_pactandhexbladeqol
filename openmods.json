@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openmods.nexus/openmods.schema.json",
+  "openmods": 1,
+  "name": "Pact and Hexblade QoL",
+  "summary": "Pact of the Blade and Hexblade bind all your equipped weapons; a weapon loses its bind when you unequip it.",
+  "games": ["baldurs-gate-3"],
+  "tags": ["gameplay", "quality-of-life"],
+  "requires": ["Norbyte's Script Extender"],
+  "gameVersions": ["Patch 8"]
+}
