@@ -12,6 +12,10 @@ Pact of the Blade and Hexblade bind all your equipped weapons; a weapon loses it
 - The bind spells are free and also work in combat. The same goes for the Eldritch Knight's **Weapon Bond**.
 - Summoning a pact weapon has no cooldown.
 
+## Screenshots
+
+![A warlock with two bound weapons](docs/screen1.jpg)
+
 ## How to install
 
 1. Install [Norbyte's Script Extender](https://github.com/Norbyte/bg3se). It updates itself.
@@ -37,7 +41,8 @@ bind. There is nothing to set up.
 
 ## Known issues
 
-None yet.
+- The status tooltip of a bound off-hand or ranged weapon says "until long rest"; the main-hand weapon says
+  "Permanent". Only the label differs: every bind stays after a long rest.
 
 ## How to build
 

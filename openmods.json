@@ -5,6 +5,7 @@
   "summary": "Pact of the Blade and Hexblade bind all your equipped weapons; a weapon loses its bind when you unequip it.",
   "games": ["baldurs-gate-3"],
   "tags": ["gameplay", "quality-of-life"],
+  "cover": "docs/cover.jpg",
   "requires": ["Norbyte's Script Extender"],
   "gameVersions": ["Patch 8"]
 }
