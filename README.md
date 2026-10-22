@@ -16,14 +16,26 @@ mod's listener never matches.
 
 - `Server/Binding.lua` (Osiris listeners on the server):
   - `CastedSpell` of `Shout_PactOfTheBlade_Bind` or `Shout_Hexblade_Bind`: every weapon in the slots `Melee Main
-    Weapon`, `Melee Offhand Weapon`, `Ranged Main Weapon` and `Ranged Offhand Weapon` gets `PACT_BLADE` or
-    `HEXBLADE_BIND` (`ApplyStatus(item, status, -1)`, only when it does not have it; the game's own spell binds the
-    main hand with `ApplyEquipmentStatus(MainHand, ...)`).
-  - `Unequipped`: the item loses both bind statuses. When the item is the summoned pact weapon (tag
-    `PACT_OF_THE_BLADE`, `be460271-537a-4443-a9b5-6c6c6a005ab3`), the other equipped weapons lose theirs.
-  - `Equipped`: when the character has a summoned pact weapon and it is equipped, the other equipped weapons get
-    `PACT_BLADE`, or `HEXBLADE_BIND` with the passive `HexWarrior`; when it is not equipped, the equipped weapons lose
-    their binds.
+    Weapon`, `Melee Offhand Weapon`, `Ranged Main Weapon` and `Ranged Offhand Weapon` (each weapon once, without the
+    shield of `GetEquippedShield`) gets `PACT_BLADE` or `HEXBLADE_BIND` (`ApplyStatus(item, status, -1)`, only when it
+    does not have it; the game's own spell binds the main hand with `ApplyEquipmentStatus(MainHand, ...)`). The bind
+    statuses are applied without a source: they are `IsUnique`, so one source holds each of them on one target only.
+  - `PACT_BLADE` gives proficiency to its source (`IntrinsicSourceProficiency()`), which these weapons lack. So every
+    bound weapon also gets the mod's status `PHQ_BIND_PROFICIENCY` (only that boost, not `IsUnique`) with the caster as
+    source (`ApplyStatus(item, status, -1, 0, caster)`).
+  - `Unequipped`: the item loses both binds and the mod's two statuses. When the item is the summoned pact weapon (tag
+    `PACT_OF_THE_BLADE`, `be460271-537a-4443-a9b5-6c6c6a005ab3`), the other equipped weapons that it bound lose their
+    bind.
+  - `Equipped`: when the character has a summoned pact weapon and it is equipped, the other equipped weapons without a
+    bind get `PACT_BLADE`, or `HEXBLADE_BIND` with the passive `HexWarrior`, plus the proficiency and the mark
+    `PHQ_PACT_WEAPON_BIND`; when it is not equipped, the marked weapons lose their bind. Binds of the bind spells stay
+    in both cases, and a bind spell removes the mark from a weapon. The game saves statuses, so the mark survives a
+    load.
+- `Server/Bg3DnDNotice.lua`: when DnD 5.5e All-in-One BEYOND is loaded (`Ext.Mod.IsModLoaded`), the host gets a message
+  box (`OpenMessageBox`) 3 seconds after the first `LevelGameplayStarted` of each load, which names the BEYOND version.
+  The text stays under 200 characters: a message box shows about 231, and longer texts can crash the game.
+- `Public/bg3_pactandhexbladeqol/Stats/Generated/Data/Status_BOOST.txt`: the two statuses of the mod, both
+  `IgnoreResting` and hidden from the overhead text, the combat log and the portrait.
 - `Shared/Spells.lua` changes five spells at run time, only these fields: `Shout_PactOfTheBlade` and
   `Shout_PactOfTheBlade_Hex` `Cooldown` `None`; `Shout_PactOfTheBlade_Bind` and `Shout_Hexblade_Bind` free
   (`UseCosts` empty), without `Requirements` (in combat too), a new `Description`, no `ExtraDescription`, and the
@@ -64,8 +76,10 @@ src/                                     Mod files (packed into the .pak)
     Lua/Client/ClientLog.lua             client.log
     Lua/Shared/Spells.lua                The spell changes (both states)
     Lua/Server/Binding.lua               Bind on cast, unbind on unequip, the summoned pact weapon
+    Lua/Server/Bg3DnDNotice.lua          The message box with DnD 5.5e All-in-One BEYOND
   Localization/English/bg3_pactandhexbladeqol.loca.xml   Texts
   Public/bg3_pactandhexbladeqol/TooltipExtras/TooltipExtraTexts.lsx   The unbind warning of the bind spells
+  Public/bg3_pactandhexbladeqol/Stats/Generated/Data/Status_BOOST.txt   Proficiency and pact weapon mark
 docs/                                    Cover and screenshots for openmods.md
 tests/                                   Offline tests (Lua 5.4 through lupa)
 scripts/bump_version.py                  Raises the last version digit in meta.lsx

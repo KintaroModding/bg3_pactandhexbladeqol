@@ -10,10 +10,11 @@ Pact of the Blade and Hexblade bind all your equipped weapons; a weapon loses it
 ## What it does
 
 - **Pact of the Blade: Bind** and **Hexblade: Bind** bind every weapon you have equipped: main hand, off hand and
-  both ranged slots. The game binds only the main-hand weapon.
-- A weapon loses its bind when you unequip it.
-- While your summoned pact weapon is equipped, your other equipped weapons are bound too (with the Hexblade bind if
-  you are a Hexblade). When you unequip the pact weapon, they lose that bind.
+  both ranged slots. The game binds only the main-hand weapon. Shields are not bound.
+- You are proficient with every bound weapon, not only with the main-hand weapon.
+- A weapon loses its bind when you unequip it. Changing other gear keeps your binds.
+- While your summoned pact weapon is equipped, your other equipped weapons without a bind are bound too (with the
+  Hexblade bind if you are a Hexblade). When you unequip the pact weapon, only these weapons lose their bind.
 - The bind spells are free and also work in combat. The same goes for the Eldritch Knight's **Weapon Bond**.
 - Summoning a pact weapon has no cooldown.
 
@@ -41,11 +42,13 @@ bind. There is nothing to set up.
 - Game version: Patch 8
 - The mod changes only a few fields of five spells (`Shout_PactOfTheBlade`, `Shout_PactOfTheBlade_Hex`,
   `Shout_PactOfTheBlade_Bind`, `Shout_Hexblade_Bind`, `Shout_WeaponBond`), while the game runs. Other changes of these
-  spells stay; for the same fields, this mod's values count.
+  spells stay; for the same fields, this mod's values count. It adds two hidden statuses of its own
+  (`PHQ_BIND_PROFICIENCY`, `PHQ_PACT_WEAPON_BIND`).
 - Do not use it together with another mod that also binds all weapons.
 - Not for DnD 5.5e All-in-One BEYOND: with it, the bind spell binds only the main-hand weapon. Use
   [Pact and Hexblade QoL - DnD 5.5e BEYOND](https://openmods.nexus/mods/kintaromodding/bg3_pactandhexbladeqol_dnd55ebynd)
-  instead, and never both mods at the same time.
+  instead, and never both mods at the same time. When this mod finds DnD 5.5e BEYOND, it tells you so in a message
+  box after each load.
 
 ## Known issues
 

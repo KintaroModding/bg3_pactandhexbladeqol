@@ -1,6 +1,11 @@
 -- The weapon binds. The game's bind spells bind the main-hand weapon only; this module binds every equipped weapon
--- when a bind spell is cast, removes the bind from a weapon when it is unequipped, and lets the summoned pact weapon
--- bind the other equipped weapons while it is equipped.
+-- (shields excepted) when a bind spell is cast, removes the bind from a weapon when it is unequipped, and lets the
+-- summoned pact weapon bind the other equipped weapons while it is equipped.
+--
+-- The bind statuses are applied without a source. They are IsUnique: a source can hold such a status on one target
+-- only, and a new target takes it from the old one (playbook knowledge\boosts.md). The proficiency that PACT_BLADE gives
+-- through its source (IntrinsicSourceProficiency) comes from the mod's own status PHQ_BIND_PROFICIENCY instead, which
+-- is not IsUnique and gets the caster as source.
 
 local ServerLog = Ext.Require("Server/ServerLog.lua")
 
@@ -8,6 +13,11 @@ local Binding = {}
 
 Binding.PactStatus = "PACT_BLADE"
 Binding.HexStatus = "HEXBLADE_BIND"
+-- Proficiency with the weapon for the source of the status (Public/.../Stats/Generated/Data/Status_BOOST.txt).
+Binding.ProficiencyStatus = "PHQ_BIND_PROFICIENCY"
+-- Marks a bind that the summoned pact weapon gave; only these binds end when the pact weapon is unequipped. The game
+-- saves statuses, so the mark survives a load.
+Binding.PactWeaponMark = "PHQ_PACT_WEAPON_BIND"
 -- The tag PACT_OF_THE_BLADE: "Weapon with this tag has been summoned by Pact of the Blade feature".
 Binding.PactWeaponTag = "be460271-537a-4443-a9b5-6c6c6a005ab3"
 -- With this passive, the summoned weapon gives the Hexblade bind.
@@ -17,6 +27,8 @@ Binding.Spells = {
     Shout_PactOfTheBlade_Bind = Binding.PactStatus,
     Shout_Hexblade_Bind = Binding.HexStatus,
 }
+-- Every status a bind can leave on a weapon; an unbound weapon loses all of them.
+Binding.AllStatuses = { Binding.PactStatus, Binding.HexStatus, Binding.ProficiencyStatus, Binding.PactWeaponMark }
 Binding.Slots = { "Melee Main Weapon", "Melee Offhand Weapon", "Ranged Main Weapon", "Ranged Offhand Weapon" }
 
 --- The UUID part of an Osiris GUID string (the last 36 characters).
@@ -30,11 +42,20 @@ local function Short(guid)
     return name ~= "" and name or guid
 end
 
---- The equipped weapons of a character, each one once, without the item `except` (a GUID string or nil).
+local function Has(item, status)
+    return Osi.HasActiveStatus(item, status) == 1
+end
+
+--- The equipped weapons of a character, each one once, without the equipped shield and the item `except` (a GUID
+--- string or nil).
 local function EquippedWeapons(character, except)
     local weapons, seen = {}, {}
     if except ~= nil then
         seen[Uuid(except)] = true
+    end
+    local shield = Osi.GetEquippedShield(character)
+    if shield ~= nil then
+        seen[Uuid(shield)] = true
     end
     for _, slot in ipairs(Binding.Slots) do
         local item = Osi.GetEquippedItem(character, slot)
@@ -46,20 +67,27 @@ local function EquippedWeapons(character, except)
     return weapons
 end
 
---- Gives the bind status when the weapon does not have it. Returns true when given.
-local function Bind(item, status)
-    if Osi.HasActiveStatus(item, status) == 1 then
-        return false
+--- Gives a weapon the bind status when it does not have it, and the proficiency for `character`. Returns true when
+--- the weapon changed.
+local function Bind(item, status, character)
+    local changed = false
+    if not Has(item, status) then
+        -- The story PROC with three arguments: Force 0, no source.
+        Osi.ApplyStatus(item, status, -1)
+        changed = true
     end
-    Osi.ApplyStatus(item, status, -1)
-    return true
+    if not Has(item, Binding.ProficiencyStatus) then
+        Osi.ApplyStatus(item, Binding.ProficiencyStatus, -1, 0, character)
+        changed = true
+    end
+    return changed
 end
 
---- Removes both bind statuses. Returns true when the weapon had one.
+--- Removes every bind status. Returns true when the weapon had one.
 local function Unbind(item)
     local removed = false
-    for _, status in ipairs({ Binding.PactStatus, Binding.HexStatus }) do
-        if Osi.HasActiveStatus(item, status) == 1 then
+    for _, status in ipairs(Binding.AllStatuses) do
+        if Has(item, status) then
             Osi.RemoveStatus(item, status)
             removed = true
         end
@@ -67,35 +95,37 @@ local function Unbind(item)
     return removed
 end
 
-local function BindAll(weapons, status)
-    local count = 0
-    for _, item in ipairs(weapons) do
-        if Bind(item, status) then
-            count = count + 1
-        end
-    end
-    return count
-end
-
-local function UnbindAll(weapons)
-    local count = 0
-    for _, item in ipairs(weapons) do
-        if Unbind(item) then
-            count = count + 1
-        end
-    end
-    return count
-end
-
---- A bind spell binds every equipped weapon. The game's own spell has bound the main-hand weapon already; the
---- status check skips it.
+--- A bind spell binds every equipped weapon. The game's own spell has bound the main-hand weapon already; the status
+--- check skips it. A weapon that the summoned pact weapon bound keeps this bind from now on.
 function Binding.OnCast(character, spell)
     local status = Binding.Spells[spell]
     if status == nil then
         return
     end
-    local count = BindAll(EquippedWeapons(character), status)
-    ServerLog.Add(string.format("%s by %s: %d more weapon(s) bound with %s.", spell, Short(character), count, status))
+    local count = 0
+    for _, item in ipairs(EquippedWeapons(character)) do
+        local changed = Bind(item, status, character)
+        if Has(item, Binding.PactWeaponMark) then
+            Osi.RemoveStatus(item, Binding.PactWeaponMark)
+            changed = true
+        end
+        if changed then
+            count = count + 1
+        end
+    end
+    ServerLog.Add(string.format("%s by %s: %d weapon(s) changed with %s.", spell, Short(character), count, status))
+end
+
+--- The weapons that the summoned pact weapon bound lose their bind; the binds of the bind spells stay. Returns the
+--- number of weapons unbound.
+local function UnbindPactWeaponBinds(weapons)
+    local count = 0
+    for _, item in ipairs(weapons) do
+        if Has(item, Binding.PactWeaponMark) and Unbind(item) then
+            count = count + 1
+        end
+    end
+    return count
 end
 
 --- An unequipped weapon loses its bind. When the summoned pact weapon is unequipped, the weapons it bound lose theirs.
@@ -104,7 +134,7 @@ function Binding.OnUnequipped(item, character)
         return
     end
     if Osi.IsTagged(item, Binding.PactWeaponTag) == 1 then
-        local count = UnbindAll(EquippedWeapons(character, item))
+        local count = UnbindPactWeaponBinds(EquippedWeapons(character, item))
         if count > 0 then
             ServerLog.Add(string.format("Pact weapon unequipped by %s: %d weapon(s) unbound.", Short(character), count))
         end
@@ -113,9 +143,9 @@ function Binding.OnUnequipped(item, character)
     end
 end
 
---- While the summoned pact weapon is equipped, it binds the other equipped weapons (the Hexblade bind with the
---- Hexblade passive). When the character has a summoned pact weapon that is not equipped, the equipped weapons lose
---- their binds.
+--- While the summoned pact weapon is equipped, it binds the other equipped weapons that have no bind yet (the
+--- Hexblade bind with the Hexblade passive), and marks these binds. When the character has a summoned pact weapon that
+--- is not equipped, the marked binds end. Binds of the bind spells stay in both cases.
 function Binding.OnEquipped(_, character)
     local pactWeapon = Osi.GetItemByTagInInventory(Binding.PactWeaponTag, character)
     if pactWeapon == nil then
@@ -124,13 +154,20 @@ function Binding.OnEquipped(_, character)
     if Osi.IsEquipped(pactWeapon) == 1 then
         local status = Osi.HasPassive(character, Binding.HexbladePassive) == 1 and Binding.HexStatus
             or Binding.PactStatus
-        local count = BindAll(EquippedWeapons(character, pactWeapon), status)
+        local count = 0
+        for _, item in ipairs(EquippedWeapons(character, pactWeapon)) do
+            if not Has(item, Binding.PactStatus) and not Has(item, Binding.HexStatus) then
+                Bind(item, status, character)
+                Osi.ApplyStatus(item, Binding.PactWeaponMark, -1)
+                count = count + 1
+            end
+        end
         if count > 0 then
             ServerLog.Add(string.format("Pact weapon of %s: %d other weapon(s) bound with %s.", Short(character), count,
                 status))
         end
     else
-        local count = UnbindAll(EquippedWeapons(character))
+        local count = UnbindPactWeaponBinds(EquippedWeapons(character))
         if count > 0 then
             ServerLog.Add(string.format("Pact weapon of %s not equipped: %d weapon(s) unbound.", Short(character),
                 count))

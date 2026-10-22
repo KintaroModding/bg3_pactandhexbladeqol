@@ -2,5 +2,10 @@
 <contentList>
 	<content contentuid="h5598e728gfe9dg430cg83a0g24a3d7ab856e" version="1">Bind all your equipped weapons. They use your &lt;LSTag Tooltip="Charisma"&gt;Charisma&lt;/LSTag&gt; modifier, their damage becomes magical, you cannot drop or throw them, and you become &lt;LSTag Tooltip="WeaponProficiency"&gt;Proficient&lt;/LSTag&gt; with them if you weren't already.</content>
 	<content contentuid="h242e5354g7deeg40bdg93a6g1b4604797abf" version="1">Bind all your equipped weapons. They use your &lt;LSTag Tooltip="Charisma"&gt;Charisma&lt;/LSTag&gt; modifier, their damage becomes magical, you cannot drop or throw them, and you become &lt;LSTag Tooltip="WeaponProficiency"&gt;Proficient&lt;/LSTag&gt; with them if you weren't already.&lt;br&gt;&lt;br&gt;When you attack with these weapons, there is a chance that &lt;LSTag Type="Status" Tooltip="HEXBLADES_CURSE"&gt;Hexblade's Curse&lt;/LSTag&gt; is applied to the target.</content>
-	<content contentuid="hc22e18b5gc4acg4422ga1cbgb32479d1be69" version="1">&lt;LSTag Type="Image" Info="SoftWarning"/&gt; A weapon loses its bind when you unequip it, or when you stay away from it for more than 10 rounds.</content>
+	<content contentuid="hc22e18b5gc4acg4422ga1cbgb32479d1be69" version="1">&lt;LSTag Type="Image" Info="SoftWarning"/&gt; All your equipped weapons get this bind; shields do not. A weapon loses its bind when you unequip it, or when you stay away from it for more than 10 rounds.</content>
+	<content contentuid="h9309c6ccg167ag417ega35cg8b7c19d76a33" version="1">Pact Weapon: Proficiency</content>
+	<content contentuid="hfc2684d4g9bb2g48aegb80fg63d7c0da0b59" version="1">The warlock who bound this weapon is &lt;LSTag Tooltip="WeaponProficiency"&gt;Proficient&lt;/LSTag&gt; with it.</content>
+	<content contentuid="h94cb47dag1c7eg4a7cga216g43b89b8240b9" version="1">Pact Weapon: Summoned Bond</content>
+	<content contentuid="hbd3365ccgb457g4dacg8eecg36ff9d64b6ff" version="1">Bound by your summoned pact weapon. The bind ends when you unequip the summoned weapon.</content>
+	<content contentuid="h7c28a4aeg45c5g404bgadd6g49d421aa2f6a" version="1">Pact and Hexblade QoL cannot bind your other weapons with the bind spells of DnD 5.5e All-in-One BEYOND. Please use Pact and Hexblade QoL - DnD 5.5e BEYOND instead.</content>
 </contentList>

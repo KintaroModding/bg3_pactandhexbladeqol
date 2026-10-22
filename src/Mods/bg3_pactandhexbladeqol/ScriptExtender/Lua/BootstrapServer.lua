@@ -9,3 +9,6 @@ end)
 
 local Binding = Ext.Require("Server/Binding.lua")
 Binding.Init()
+
+local Bg3DnDNotice = Ext.Require("Server/Bg3DnDNotice.lua")
+Bg3DnDNotice.Init()

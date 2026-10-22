@@ -31,11 +31,22 @@ function FileWriter.New(path, delayMs, build)
     return writer
 end
 
---- Returns a line list that keeps the newest maxLines lines and writes them to a text file.
+--- Returns a line list that keeps the newest maxLines lines and writes them to a text file. It starts with the lines
+--- already in the file: both Lua states start again on every save load, and the lines from before (the game start,
+--- the last session) must stay.
 --- @param path string
 --- @param maxLines integer
 function FileWriter.NewLineFile(path, maxLines)
     local lines = {}
+    local ok, old = pcall(Ext.IO.LoadFile, path)
+    if ok and type(old) == "string" then
+        for line in string.gmatch(old, "[^\r\n]+") do
+            lines[#lines + 1] = line
+        end
+        while #lines > maxLines do
+            table.remove(lines, 1)
+        end
+    end
     local writer = FileWriter.New(path, 1000, function()
         return table.concat(lines, "\n") .. "\n"
     end)
