@@ -2,6 +2,11 @@
 
 Pact of the Blade and Hexblade bind all your equipped weapons; a weapon loses its bind when you unequip it.
 
+> **Do you play with [DnD 5.5e All-in-One BEYOND](https://mod.io/g/baldursgate3/m/bg3dnd)?** Then use
+> [Pact and Hexblade QoL - DnD 5.5e BEYOND](https://openmods.nexus/mods/kintaromodding/bg3_pactandhexbladeqol_dnd55ebynd)
+> instead of this mod. DnD 5.5e BEYOND replaces the bind spell with four new ones, one per damage type, and this mod
+> does not know them.
+
 ## What it does
 
 - **Pact of the Blade: Bind** and **Hexblade: Bind** bind every weapon you have equipped: main hand, off hand and
@@ -38,6 +43,9 @@ bind. There is nothing to set up.
   `Shout_PactOfTheBlade_Bind`, `Shout_Hexblade_Bind`, `Shout_WeaponBond`), while the game runs. Other changes of these
   spells stay; for the same fields, this mod's values count.
 - Do not use it together with another mod that also binds all weapons.
+- Not for DnD 5.5e All-in-One BEYOND: with it, the bind spell binds only the main-hand weapon. Use
+  [Pact and Hexblade QoL - DnD 5.5e BEYOND](https://openmods.nexus/mods/kintaromodding/bg3_pactandhexbladeqol_dnd55ebynd)
+  instead, and never both mods at the same time.
 
 ## Known issues
 

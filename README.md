@@ -7,6 +7,11 @@ A mod for Baldur's Gate 3 (Patch 8), made with game version 4.1.1.7398727. It ne
 to install it and its compatibility are in [openmods.md](openmods.md), the mod page on
 [openmods](https://openmods.nexus).
 
+For [DnD 5.5e All-in-One BEYOND](https://mod.io/g/baldursgate3/m/bg3dnd), use
+[bg3_pactandhexbladeqol_dnd55ebynd](https://github.com/KintaroModding/bg3_pactandhexbladeqol_dnd55ebynd): that mod
+turns `Shout_PactOfTheBlade_Bind` into a container with four variants, and `CastedSpell` names the variant, so this
+mod's listener never matches.
+
 ## How it works
 
 - `Server/Binding.lua` (Osiris listeners on the server):
